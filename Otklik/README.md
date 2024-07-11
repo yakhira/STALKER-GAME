@@ -1,6 +1,5 @@
-# Anomaly zone detector simulator
+# Artefact detector
 
-This is a project for Stalker RPG event. 
-Based on ESP32 module it works as BLE scanner to detect devices around as anomaly.
-
-![rerun-button](device.jpg)
+1. Scans BLE devices with name ZoneArtefact
+2. ADC voltage level to PIN 14
+3. ADC voltage level to PIN 12

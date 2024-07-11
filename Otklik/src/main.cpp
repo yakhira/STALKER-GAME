@@ -3,7 +3,7 @@
 #include "NimBLEDevice.h"
 #include <Tone32.h>
 
-#define BLE_DIVECE_NAME "ZoneAnomaly"
+#define DIVECE_NAME "ZoneArtefact"
 
 #define ARROW_TRIGGER_PIN 14
 #define ARROW_CHANNEL 2
@@ -22,7 +22,7 @@ NimBLEScan* pBLEScan;
 
 class MyAdvertisedDeviceCallbacks: public NimBLEAdvertisedDeviceCallbacks {
     void onResult(NimBLEAdvertisedDevice* advertisedDevice) {
-		if (strcmp(advertisedDevice->getName().c_str(), BLE_DIVECE_NAME) == 0 ) {
+		if (strcmp(advertisedDevice->getName().c_str(), DIVECE_NAME) == 0 ) {
 			rssi = (100 + advertisedDevice->getRSSI()) * 10;
 
 			if (rssi >= 1024) {

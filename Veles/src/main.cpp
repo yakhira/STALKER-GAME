@@ -3,7 +3,8 @@
 #include "NimBLEDevice.h"
 #include <Tone32.h>
 
-#define BLE_DIVECE_NAME "ZoneAnomaly"
+#define ANOMALY_NAME  "ZoneAnomaly"
+#define ARTEFACT_NAME "ZoneArtefact"
 
 #define ARROW_TRIGGER_PIN 14
 #define ARROW_CHANNEL 2
@@ -11,6 +12,9 @@
 #define BUZZER_PIN 12
 #define BUZZER_CHANNEL 0
 #define BUZZER_BASE_FREQ 1024
+
+#define BUTTON_IN_PIN 15
+#define BUTTON_OUT_PIN 13
 
 #define LAST_RSSI_SIZE 5
 
@@ -22,7 +26,14 @@ NimBLEScan* pBLEScan;
 
 class MyAdvertisedDeviceCallbacks: public NimBLEAdvertisedDeviceCallbacks {
     void onResult(NimBLEAdvertisedDevice* advertisedDevice) {
-		if (strcmp(advertisedDevice->getName().c_str(), BLE_DIVECE_NAME) == 0 ) {
+		int device_found = 1;
+
+		if (digitalRead(BUTTON_IN_PIN) == HIGH) {
+			device_found = strcmp(advertisedDevice->getName().c_str(), ARTEFACT_NAME);
+		} else {
+			device_found = strcmp(advertisedDevice->getName().c_str(), ANOMALY_NAME);
+		}
+		if (device_found == 0 ) {
 			rssi = (100 + advertisedDevice->getRSSI()) * 10;
 
 			if (rssi >= 1024) {
@@ -42,6 +53,11 @@ class MyAdvertisedDeviceCallbacks: public NimBLEAdvertisedDeviceCallbacks {
 };
 
 void setup() {
+	pinMode(BUTTON_IN_PIN, INPUT);
+	pinMode(BUTTON_OUT_PIN, OUTPUT);
+
+	digitalWrite(BUTTON_OUT_PIN, HIGH);
+
 	ledcAttachPin(ARROW_TRIGGER_PIN, ARROW_CHANNEL);
     ledcSetup(ARROW_CHANNEL, 2000, 8);
 
