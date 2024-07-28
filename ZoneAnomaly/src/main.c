@@ -5,7 +5,7 @@
 #define PIR PB1
 #define SWITCH PB2
 
-#define COOLDOWN 5e3
+#define COOLDOWN 7e3
 
 bool activated = false;
 
@@ -25,23 +25,14 @@ ISR(PCINT0_vect)
 
 void collapse()
 {
-	for (int j =  0; j < 1000; j++) {
+	for (int j =  0; j < 100; j++) {
 		for (int i = 0; i < 25; i++){
 			digitalWrite(SWITCH, HIGH);
 			delayMicroseconds(750);
 			digitalWrite(SWITCH, LOW);
 			delayMicroseconds(750);
 		}
-
 		_delay_ms(50);
-
-		for (int i = 0; i < 25; i++){
-			digitalWrite(SWITCH, HIGH);
-			delayMicroseconds(500);
-			digitalWrite(SWITCH, LOW);
-			delayMicroseconds(500);
-		}
-		_delay_ms(100);
 	}
 }
 
