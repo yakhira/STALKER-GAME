@@ -8,8 +8,9 @@
 #define DIVECE_NAME "ZoneArtefact"
 #define SETTINGS_UUID "0x0666"
 
-#define ARROW_TRIGGER_PIN 14
-#define ARROW_CHANNEL 2
+#define LED1_PIN  13
+#define LED2_PIN  14
+#define LED3_PIN  15
 
 #define BUZZER_PIN 12
 #define BUZZER_CHANNEL 0
@@ -21,6 +22,9 @@ unsigned int rssi = 0;
 unsigned int last_rssi[LAST_RSSI_SIZE] = {0};
 unsigned int last_rssi_index = 0;
 unsigned int low_signal_filter = 0;
+
+unsigned long previousMillis = 0; 
+unsigned long interval = 0;
 
 NimBLEScan* pBLEScan;
 
@@ -48,14 +52,14 @@ class MyAdvertisedDeviceCallbacks: public NimBLEAdvertisedDeviceCallbacks {
 				rssi = 0;
 			}
 
-			ledcWrite(ARROW_CHANNEL, rssi);
-
 			Serial.printf(
 				"Advertised Device: %s, Address: %s, RSSI: %d \n", 
 				advertisedDevice->getName().c_str(),
 				advertisedDevice->getAddress().toString().c_str(),
 				rssi/10
 			);
+
+			interval = 1024 - rssi - 100;
 		}
     }
 };
@@ -79,8 +83,9 @@ void readFile(String filename, String &data) {
 void setup() {
 	String data;
 
-	ledcAttachPin(ARROW_TRIGGER_PIN, ARROW_CHANNEL);
-    ledcSetup(ARROW_CHANNEL, 2000, 8);
+	pinMode(LED1_PIN, OUTPUT);
+	pinMode(LED2_PIN, OUTPUT);
+	pinMode(LED3_PIN, OUTPUT);
 
   	Serial.begin(115200);
 	LittleFS.begin();
@@ -113,11 +118,39 @@ void loop() {
 		pBLEScan->start(0, nullptr, false);
 	}
 
-	int freq = BUZZER_BASE_FREQ - rssi;
+	int freq = BUZZER_BASE_FREQ - rssi - 100;
 
-	tone(BUZZER_PIN, NOTE_A1, freq, BUZZER_CHANNEL);
-  	noTone(BUZZER_PIN, BUZZER_CHANNEL);
-	delay(freq);
+	if (rssi > 0) {
+		tone(BUZZER_PIN, NOTE_A1, freq, BUZZER_CHANNEL);
+		noTone(BUZZER_PIN, BUZZER_CHANNEL);
+		delay(freq);
+
+		unsigned long currentMillis = millis();
+
+		if (currentMillis - previousMillis >= interval) {
+			previousMillis = currentMillis;
+
+			if (digitalRead(LED1_PIN) == LOW) {
+				digitalWrite(LED1_PIN, HIGH);
+				digitalWrite(LED2_PIN, HIGH);
+				digitalWrite(LED3_PIN, HIGH);
+
+				digitalWrite(LED1_PIN, LOW);
+				digitalWrite(LED2_PIN, LOW);
+				digitalWrite(LED3_PIN, LOW);
+
+				delay(100);
+
+				digitalWrite(LED1_PIN, HIGH);
+				digitalWrite(LED2_PIN, HIGH);
+				digitalWrite(LED3_PIN, HIGH);
+			} else {
+				digitalWrite(LED1_PIN, LOW);
+				digitalWrite(LED2_PIN, LOW);
+				digitalWrite(LED3_PIN, LOW);
+			}
+		}
+	}
    
 	if (last_rssi_index > LAST_RSSI_SIZE - 1) {
 		bool reset_rssi = true;
@@ -131,7 +164,10 @@ void loop() {
 
 		if (reset_rssi) {
 			rssi = 0;
-			ledcWrite(ARROW_CHANNEL, rssi);
+
+			digitalWrite(LED1_PIN, LOW);
+			digitalWrite(LED2_PIN, LOW);
+			digitalWrite(LED3_PIN, LOW);
 		}
 		last_rssi_index = 0;
 	} else {
