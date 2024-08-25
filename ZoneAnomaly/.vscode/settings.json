@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "uart.h": "c",
+        "interrupt.h": "c",
+        "arduino.h": "c",
+        "delay.h": "c"
+    }
+}
